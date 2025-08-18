@@ -1,0 +1,176 @@
+<style>
+    :root {
+        --color-background: #ffffff;
+        --color-primary-light   : 0, 98, 158;
+        --color-on-primary-light: 255, 255, 255;
+        --color-primary-dark    : 154, 203, 255;
+        --color-on-primary-dark : 0, 51, 85;
+        --color-primary: var(--color-primary-light);
+        --color-on-primary: var(--color-on-primary-light);
+
+        border: none;
+        outline: none;
+        background-color: var(--color-background);
+        color-scheme: light;
+        font-family: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --color-background: #2C2C2C;
+            --color-primary: var(--color-primary-dark);
+            --color-on-primary: var(--color-on-primary-dark);
+            color-scheme: dark;
+        }
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: inherit;
+    }
+
+    label, input, button, p {
+        display: block;
+        font-size: 14px;
+    }
+
+    p {
+        padding: 8px 0 4px 0;
+    }
+
+    ul {
+        list-style: none;
+        padding-bottom: 16px;
+    }
+
+    button {
+        display: flex;
+        align-items: center;
+        min-height: 32px;
+        padding: 0 10px 0 4px;
+        gap: 8px;
+        border-radius: 4px;
+        border: 1px solid transparent;
+        cursor: pointer;
+        font-weight: 500;
+        background-color: rgb(var(--color-primary));
+        color: rgb(var(--color-on-primary));
+        transition-duration: .25s;
+    }
+
+    button:hover {
+        background-color: rgba(var(--color-primary), .68);
+    }
+
+    button:active {
+        background-color: rgba(var(--color-primary), .52);
+    }
+
+    button > svg {
+        fill: rgb(var(--color-on-primary));
+    }
+
+    .radio {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition-duration: .25s;
+    }
+
+    .radio:hover {
+        color: rgb(var(--color-primary));
+    }
+
+    #--plug-count {
+        padding: 4px 10px;
+        min-height: 32px;
+        border-radius: 4px;
+        border: 2px solid;
+        outline: none;
+        width: 100%;
+        transition-duration: .25s;
+    }
+
+    #--plug-count:hover, #--plug-count:focus {
+        border-color: rgb(var(--color-primary));
+    }
+
+    #app {
+        padding: 20px;
+    }
+</style>
+
+<div id="app">
+    <label for="--plug-count" style="padding-bottom:4px">Count:</label>
+    <input id="--plug-count" type="number" min="1" value="1">
+
+    <p>Type:</p>
+    <ul>
+        <li>
+            <label for="--plug-type-word" class="radio">
+                <input type="radio" name="--plug-generator-type" checked id="--plug-type-word">
+                Word
+            </label>
+        </li>
+        <li>
+            <label for="--plug-type-sentence" class="radio">
+                <input type="radio" name="--plug-generator-type" id="--plug-type-sentence">
+                Sentence
+            </label>
+        </li>
+        <li>
+            <label for="--plug-type-paragraph" class="radio">
+                <input type="radio" name="--plug-generator-type" id="--plug-type-paragraph">
+                Paragraph
+            </label>
+        </li>
+    </ul>
+
+    <button id="--plug-generate">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+            <path d="M560-160v-80h104L537-367l57-57 126 126v-102h80v240H560Zm-344 0-56-56 504-504H560v-80h240v240h-80v-104L216-160Zm151-377L160-744l56-56 207 207-56 56Z"/>
+        </svg>
+        Generate
+    </button>
+</div>
+
+<script>
+    const $id = (id) => document.getElementById(id)
+    const countRef = $id('--plug-count')
+    const typeWordRef = $id('--plug-type-word')
+    const typeSentenceRef = $id('--plug-type-sentence')
+    const typeParagraphRef = $id('--plug-type-paragraph')
+    $id('--plug-generate').onclick = () => {
+        let count = countRef.valueAsNumber
+        if (count < 1 || Number.isNaN(count) || !Number.isFinite(count)) {
+            countRef.setCustomValidity('Minimum count is 1')
+	        countRef.reportValidity()
+            return
+        }
+
+        countRef.setCustomValidity('')
+        countRef.reportValidity()
+
+        let generatorType = 'word'
+        switch (document.querySelector('input[type=radio][name="--plug-generator-type"]:checked')) {
+        case typeWordRef:
+            generatorType = 'word'
+            break
+        case typeSentenceRef:
+            generatorType = 'sentence'
+            break
+        case typeParagraphRef:
+            generatorType = 'paragraph'
+            break
+        }
+
+        parent.postMessage({pluginMessage: {
+            type: 'generate',
+            count,
+            generatorType
+        }}, '*')
+    }
+</script>
