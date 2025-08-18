@@ -69,13 +69,17 @@ async function generateLoremIpsumText(count: number, type: GeneratorType) {
         }
     } else {
         const textNode = figma.createText()
-        textNode.characters = text
+        try {
+            await figma.loadFontAsync(textNode.fontName as FontName)
+            textNode.characters = text
 
-        const {x, y, width, height} = figma.viewport.bounds
-        textNode.x = x + width / 2
-        textNode.y = y + height / 2
-
-        figma.currentPage.selection = [textNode]
+            const {x, y, width, height} = figma.viewport.bounds
+            textNode.x = x + width / 2
+            textNode.y = y + height / 2
+            figma.currentPage.selection = [textNode]
+        } catch (error) {
+            console.error("Error creating new text node:", error)
+        }
     }
 }
 
