@@ -98,36 +98,75 @@
         border-color: rgb(var(--color-primary));
     }
 
-    #app {
+    #--plug-options {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2px;
+    }
+
+    #--plug-app {
         padding: 20px;
     }
 </style>
 
-<div id="app">
+<div id="--plug-app">
     <label for="--plug-count" style="padding-bottom:4px">Count:</label>
     <input id="--plug-count" type="number" min="1" value="1">
 
-    <p>Type:</p>
-    <ul>
-        <li>
-            <label for="--plug-type-word" class="radio">
-                <input type="radio" name="--plug-generator-type" checked id="--plug-type-word">
-                Word
-            </label>
-        </li>
-        <li>
-            <label for="--plug-type-sentence" class="radio">
-                <input type="radio" name="--plug-generator-type" id="--plug-type-sentence">
-                Sentence
-            </label>
-        </li>
-        <li>
-            <label for="--plug-type-paragraph" class="radio">
-                <input type="radio" name="--plug-generator-type" id="--plug-type-paragraph">
-                Paragraph
-            </label>
-        </li>
-    </ul>
+    <div id="--plug-options">
+        <div>
+            <p>Text case:</p>
+            <ul>
+                <li>
+                    <label for="--plug-case-auto" class="radio">
+                        <input type="radio" name="--plug-case" checked id="--plug-case-auto">
+                        Auto
+                    </label>
+                </li>
+                <li>
+                    <label for="--plug-case-uppercase" class="radio">
+                        <input type="radio" name="--plug-case" id="--plug-case-uppercase">
+                        Uppercase
+                    </label>
+                </li>
+                <li>
+                    <label for="--plug-case-lowercase" class="radio">
+                        <input type="radio" name="--plug-case" id="--plug-case-lowercase">
+                        Lowercase
+                    </label>
+                </li>
+                <li>
+                    <label for="--plug-case-capitalize" class="radio">
+                        <input type="radio" name="--plug-case" id="--plug-case-capitalize">
+                        Capitalize
+                    </label>
+                </li>
+            </ul>
+        </div>
+        <div>
+            <p>Type:</p>
+            <ul>
+                <li>
+                    <label for="--plug-type-word" class="radio">
+                        <input type="radio" name="--plug-generator-type" checked id="--plug-type-word">
+                        Word
+                    </label>
+                </li>
+                <li>
+                    <label for="--plug-type-sentence" class="radio">
+                        <input type="radio" name="--plug-generator-type" id="--plug-type-sentence">
+                        Sentence
+                    </label>
+                </li>
+                <li>
+                    <label for="--plug-type-paragraph" class="radio">
+                        <input type="radio" name="--plug-generator-type" id="--plug-type-paragraph">
+                        Paragraph
+                    </label>
+                </li>
+            </ul>
+        </div>
+    </div>
 
     <button id="--plug-generate">
         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
@@ -143,6 +182,10 @@
     const typeWordRef = $id('--plug-type-word')
     const typeSentenceRef = $id('--plug-type-sentence')
     const typeParagraphRef = $id('--plug-type-paragraph')
+    const caseAutoRef = $id('--plug-case-auto')
+    const caseUppercaseRef = $id('--plug-case-uppercase')
+    const caseLowercaseRef = $id('--plug-case-lowercase')
+    const caseCapitalizeRef = $id('--plug-case-capitalize')
     $id('--plug-generate').onclick = () => {
         let count = countRef.valueAsNumber
         if (count < 1 || Number.isNaN(count) || !Number.isFinite(count)) {
@@ -167,10 +210,27 @@
             break
         }
 
+        let textCase = 'auto'
+        switch (document.querySelector('input[type=radio][name="--plug-case"]:checked')) {
+        case caseAutoRef:
+            textCase = 'auto'
+            break
+        case caseUppercaseRef:
+            textCase = 'uppercase'
+            break
+        case caseLowercaseRef:
+            textCase = 'lowercase'
+            break
+        case caseCapitalizeRef:
+            textCase = 'capitalize'
+            break
+        }
+
         parent.postMessage({pluginMessage: {
             type: 'generate',
             count,
-            generatorType
+            generatorType,
+            textCase
         }}, '*')
     }
 </script>

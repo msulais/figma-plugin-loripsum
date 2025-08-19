@@ -1,8 +1,10 @@
 type GeneratorType = 'word' | 'sentence' | 'paragraph'
+type TextTransformCase = 'uppercase' | 'lowercase' | 'capitalize' | 'auto'
 type FigmaMessage = {
     type: string,
     count: number,
     generatorType: GeneratorType
+    textCase: TextTransformCase
 }
 
 const ALL_LOREM_IPSUM = ['lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit', 'sed', 'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore', 'et', 'dolore', 'magna', 'aliqua', 'enim', 'ad', 'minim', 'veniam', 'quis', 'nostrud', 'exercitation', 'ullamco', 'laboris', 'nisi', 'aliquip', 'ex', 'ea', 'commodo', 'consequat', 'duis', 'aute', 'irure', 'in', 'reprehenderit', 'voluptate', 'velit', 'esse', 'cillum', 'eu', 'fugiat', 'nulla', 'pariatur', 'excepteur', 'sint', 'occaecat', 'cupidatat', 'non', 'proident', 'sunt', 'culpa', 'qui', 'officia', 'deserunt', 'mollit', 'anim', 'id', 'est', 'laborum']
@@ -36,7 +38,7 @@ function getRandomParagraph(): string {
     return text.join(' ')
 }
 
-async function generateLoremIpsumText(count: number, type: GeneratorType) {
+async function generateLoremIpsumText(count: number, type: GeneratorType, textCase: TextTransformCase) {
     const textArr: string[] = []
     let separator = ' '
     for (let i = 0; i < count; i++) {
@@ -54,7 +56,25 @@ async function generateLoremIpsumText(count: number, type: GeneratorType) {
         }
     }
 
-    const text = textArr.join(separator)
+    let text = textArr.join(separator)
+    switch (textCase) {
+    case "uppercase":
+        text = text.toUpperCase()
+        break
+    case "lowercase":
+        text = text.toLowerCase()
+        break
+    case "capitalize":
+        text = text.split(' ').map(v =>
+            v.substring(0, 1).toUpperCase()
+            + v.substring(1).toLowerCase()
+        ).join(' ')
+        break
+    case "auto":
+        text = text.substring(0, 1).toUpperCase() + text.substring(1)
+        break
+    }
+
     const selection = figma.currentPage.selection
     const textNodes = selection.filter(node => node.type === "TEXT") as TextNode[]
 
@@ -84,9 +104,9 @@ async function generateLoremIpsumText(count: number, type: GeneratorType) {
 }
 
 function initFigmaPluginMessage() {
-    figma.ui.onmessage = ({ type, count, generatorType }: FigmaMessage) => {
+    figma.ui.onmessage = ({ type, count, generatorType, textCase }: FigmaMessage) => {
         if (type === 'generate') {
-            generateLoremIpsumText(count, generatorType)
+            generateLoremIpsumText(count, generatorType, textCase)
         }
     }
 }
